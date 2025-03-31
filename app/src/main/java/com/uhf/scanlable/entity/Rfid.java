@@ -1,17 +1,34 @@
 package com.uhf.scanlable.entity;
 
+import com.google.gson.annotations.SerializedName;
+import com.uhf.scanlable.ScanMode;
+
 import java.math.BigDecimal;
 
 public class Rfid {
+    @SerializedName("rfid")
     private String epc;
-    private Integer hotelId;
+    @SerializedName("cus_id")
+    private String hotelId;
     private String hotelName;
     private Integer type;
     private String typeName;
     private Integer classification;
     private String classificationName;
-    private BigDecimal size;
+    private String size;
     private String remark;
+
+    public Rfid() {
+    }
+    public Rfid(ScanMode.InventoryTagMap map){
+        this.epc = map.strEPC;
+        this.type = map.type;
+        this.hotelId = map.hotelId;
+        this.hotelName = map.hotel;
+        this.classification = map.classification;
+        this.remark = map.remark;
+    }
+
 
     public String getEpc() {
         return epc;
@@ -21,11 +38,11 @@ public class Rfid {
         this.epc = epc;
     }
 
-    public Integer getHotelId() {
+    public String getHotelId() {
         return hotelId;
     }
 
-    public void setHotelId(Integer hotelId) {
+    public void setHotelId(String hotelId) {
         this.hotelId = hotelId;
     }
 
@@ -51,7 +68,7 @@ public class Rfid {
                 return "传统";
             case 1:
                 return "共享";
-            default: return "";
+            default: return null;
         }
     }
 
@@ -67,21 +84,32 @@ public class Rfid {
     public String getClassificationName() {
         switch (this.classification){
             case 0:
-                return "床单";
+                return "1米2床单";
             case 1:
-                return "被套";
+                return "1米5床单";
             case 2:
-                return "枕套";
-            default: return "";
+                return "1米8床单";
+            case 3:
+                return "1米2被套";
+            case 4:
+                return "1米5被套";
+            case 5:
+                return "1米8被套";
+            case 6:
+                return "浴巾";
+            case 7:
+                return "面巾";
+            default:
+                return "";
         }
     }
 
 
-    public BigDecimal getSize() {
+    public String getSize() {
         return size;
     }
 
-    public void setSize(BigDecimal size) {
+    public void setSize(String size) {
         this.size = size;
     }
 

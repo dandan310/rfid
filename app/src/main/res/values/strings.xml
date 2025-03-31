@@ -22,7 +22,15 @@
     <string name="idno">ID</string>
     <string name="epcid">EPC</string>
     <string name="times">Times</string>
-    <string name="rssi">RSSI</string>
+    <string name="remark">Remark</string>
+    <string name="chooseHotel">chooseHotel</string>
+    <string name="chooseType">chooseHotel</string>
+    <string name="chooseClassification">chooseClassification</string>
+    <string name="chooseSize">chooseSize</string>
+
+
+    <string name="hotel">Hotel</string>
+    <string name="type">Type</string>
     <string name="antenna">Antenna</string>
     <string name="ant1">ANT1</string>
     <string name="ant2">ANT2</string>
@@ -625,6 +633,10 @@
     <string name="intervaltime">Interval time:</string>
     <string name="phase">Phase</string>
     <string name="freq">Freq(khz)</string>
+    <string name="size">Size</string>
+
     <string name="devaddr">Dev Address:</string>
     <string name="cfgdevaddr">Config Address</string>
+    <string name="classification">Classification</string>
+
 </resources>

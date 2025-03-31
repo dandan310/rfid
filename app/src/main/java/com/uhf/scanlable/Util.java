@@ -10,6 +10,10 @@ public class Util {
 		Toast.makeText(context, resRes, Toast.LENGTH_LONG).show();
 		return false;
 	}
+
+	public static boolean isStrEmpty(String editText){
+		return editText==null|| editText.isEmpty();
+	}
 	
 	public static boolean isEtEmpty(EditText editText){
 		String str = editText.getText().toString();

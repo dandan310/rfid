@@ -42,43 +42,11 @@
         android:layout_height="match_parent"
         android:background="#BBBBBB" />
 	
-	<TextView
-	    android:id="@+id/times_text"
+	<EditText
+	    android:id="@+id/remark_text"
+		android:focusable="true"
 		android:layout_width="0dip"
-		android:layout_height="wrap_content"
-		android:layout_weight="1"
-		android:padding="2sp"
-		android:textSize="16sp"
-		android:textColor="#ff333333"
-		android:gravity="center"
-		android:singleLine="true" />
-
-	<View
-        android:layout_width="1dp"
-        android:layout_height="match_parent"
-        android:background="#BBBBBB" />
-	
-	<TextView
-	    android:id="@+id/rssi_text"
-		android:layout_width="0dip"
-		android:layout_height="wrap_content"
-		android:layout_weight="1"
-		android:padding="2sp"
-		android:textSize="16sp"
-		android:textColor="#ff333333"
-		android:gravity="center"
-		android:singleLine="true" />
-
-   
-	
-	<View
-        android:layout_width="1dp"
-        android:layout_height="match_parent"
-        android:background="#BBBBBB" />
-	
-	<TextView
-	    android:id="@+id/ant_text"
-		android:layout_width="0dip"
+		android:focusableInTouchMode="true"
 		android:layout_height="wrap_content"
 		android:layout_weight="2"
 		android:padding="2sp"
@@ -91,9 +59,39 @@
         android:layout_width="1dp"
         android:layout_height="match_parent"
         android:background="#BBBBBB" />
-
+	<Spinner
+		android:id="@+id/spinner_hotel"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_weight="2"
+		android:prompt="@string/chooseHotel"
+		android:visibility="gone"/>
 	<TextView
-		android:id="@+id/phase_text"
+	    android:id="@+id/hotel_text"
+		android:layout_width="0dip"
+		android:layout_height="wrap_content"
+		android:layout_weight="2"
+		android:padding="2sp"
+		android:textSize="16sp"
+		android:textColor="#ff333333"
+		android:gravity="center"
+		android:singleLine="true" />
+
+   
+	
+	<View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:background="#BBBBBB" />
+	<Spinner
+		android:id="@+id/spinner_type"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_weight="1"
+		android:prompt="@string/chooseType"
+		android:visibility="gone"/>
+	<TextView
+	    android:id="@+id/type_text"
 		android:layout_width="0dip"
 		android:layout_height="wrap_content"
 		android:layout_weight="1"
@@ -104,12 +102,18 @@
 		android:singleLine="true" />
 
 	<View
-		android:layout_width="1dp"
-		android:layout_height="match_parent"
-		android:background="#BBBBBB" />
-
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:background="#BBBBBB" />
+	<Spinner
+		android:id="@+id/spinner_classification"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_weight="1"
+		android:prompt="@string/chooseClassification"
+		android:visibility="gone"/>
 	<TextView
-		android:id="@+id/freq_text"
+		android:id="@+id/classification_text"
 		android:layout_width="0dip"
 		android:layout_height="wrap_content"
 		android:layout_weight="1"
@@ -118,6 +122,28 @@
 		android:textColor="#ff333333"
 		android:gravity="center"
 		android:singleLine="true" />
+
+<!--	<View-->
+<!--		android:layout_width="1dp"-->
+<!--		android:layout_height="match_parent"-->
+<!--		android:background="#BBBBBB" />-->
+<!--	<Spinner-->
+<!--		android:id="@+id/spinner_size"-->
+<!--		android:layout_width="0dp"-->
+<!--		android:layout_height="wrap_content"-->
+<!--		android:layout_weight="1"-->
+<!--		android:prompt="@string/chooseClassification"-->
+<!--		android:visibility="gone"/>-->
+<!--	<TextView-->
+<!--		android:id="@+id/freq_text"-->
+<!--		android:layout_width="0dip"-->
+<!--		android:layout_height="wrap_content"-->
+<!--		android:layout_weight="1"-->
+<!--		android:padding="2sp"-->
+<!--		android:textSize="16sp"-->
+<!--		android:textColor="#ff333333"-->
+<!--		android:gravity="center"-->
+<!--		android:singleLine="true" />-->
 
 	<View
 		android:layout_width="1dp"

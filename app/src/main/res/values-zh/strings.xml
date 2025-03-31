@@ -22,8 +22,16 @@
     <string name="idno">ID</string>
     <string name="epcid">EPC</string>
     <string name="times">次数</string>
-    <string name="rssi">RSSI</string>
-    <string name="antenna">天线号</string>
+    <string name="hotel">酒店</string>
+    <string name="type">类型</string>
+    <string name="chooseHotel">请选择酒店</string>
+    <string name="chooseType">请选择种类</string>
+    <string name="chooseClassification">请选择类型</string>
+    <string name="chooseSize">请选择尺寸</string>
+
+
+    <string name="remark">备注</string>
+    <string name="antenna">天线</string>
     <string name="ant1">天线1</string>
     <string name="ant2">天线2</string>
     <string name="ant3">天线3</string>
@@ -598,5 +606,7 @@
     <string name="intervaltime">间隔时间:</string>
     <string name="phase">相位</string>
     <string name="freq">频点(khz)</string>
+    <string name="classification">种类</string>
+    <string name="size">尺寸</string>
 
 </resources>

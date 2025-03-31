@@ -1,18 +1,25 @@
 package com.uhf.scanlable;
 
+import com.uhf.scanlable.entity.BarCode;
 import com.uhf.scanlable.entity.Hotel;
+import com.uhf.scanlable.entity.InboundEntity;
+import com.uhf.scanlable.entity.Res;
+import com.uhf.scanlable.entity.Resp;
 import com.uhf.scanlable.entity.Rfid;
 
-import java.util.List;
-
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 
 public interface ApiInterface {
-    @GET("/epcInfo?apipost_id=1e230abb9c002")  // 替换成你的接口 URL
-    Call<List<Rfid>> getRfidList();
+    @GET("/api/baseData/linenManage/rfidList")  // 替换成你的接口 URL
+    Call<Res<Rfid>> getRfidList();
 
-    @GET("https://your-api-url.com/")  // 替换成你的接口 URL
-    Call<List<Hotel>> getHotelList();
+    @POST("/api/orderCenter/linenStore/inBound")  // 替换成你的接口 URL
+    Call<Resp<BarCode>> inBound(@Body InboundEntity inboundEntity);
+
+    @GET("/api/baseData/customerManage/hotelList")  // 替换成你的接口 URL
+    Call<Res<Hotel>> getHotelList();
 
 }
