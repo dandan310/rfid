@@ -3,16 +3,21 @@ package com.uhf.scanlable;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
+import android.util.Log;
 
 public class BootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
+            Log.d("BootReceiver", "设备已启动，准备启动应用...");
+
             // 启动目标应用的主 Activity
-            Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage("com.uhf.scanlable");
-            if (launchIntent != null) {
-                launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(launchIntent);
+            Intent serviceIntent = new Intent(context, AutoStartService.class);
+            if (Build.VERSION_CODES.O <= Build.VERSION.SDK_INT) {
+                context.startForegroundService(serviceIntent);
+            } else {
+                context.startService(serviceIntent);
             }
         }
     }

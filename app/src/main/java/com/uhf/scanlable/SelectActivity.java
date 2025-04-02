@@ -22,7 +22,15 @@ public class SelectActivity extends Activity implements OnClickListener{
 		btn_232.setOnClickListener(this);
 		btn_tcp.setOnClickListener(this);
 	}
-	
+
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		btn_232.performClick();
+
+	}
+
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {

@@ -12,7 +12,7 @@ import android.widget.TabHost;
 
 public class MainActivity extends TabActivity {
 	
-	private TabHost myTabHost;
+	public TabHost myTabHost;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

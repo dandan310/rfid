@@ -91,8 +91,8 @@ public class Connect232 extends Activity {
 			spacom = new ArrayAdapter<String>(Connect232.this,  
                     android.R.layout.simple_spinner_dropdown_item, entryValues);  
 			mDropPort.setAdapter(spacom);  
-			mDropPort.setSelection(0,false);
-			devport = spacom.getItem(0);
+			mDropPort.setSelection(9,false);
+			devport = spacom.getItem(9);
 			mDropPort.setOnItemSelectedListener(new Spinner.OnItemSelectedListener() {  
 		        public void onItemSelected(AdapterView<?> arg0, View arg1,  
 		                int position, long arg3) {  
@@ -190,8 +190,9 @@ public class Connect232 extends Activity {
 		
 		@Override
 		protected void onResume() {
-			// TODO Auto-generated method stub	
+			// TODO Auto-generated method stub
 			super.onResume();
+			mConectButton.performClick();
 		}
 		
 		

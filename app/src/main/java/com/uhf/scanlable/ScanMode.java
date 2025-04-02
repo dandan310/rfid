@@ -260,6 +260,9 @@ public class ScanMode extends Activity implements OnClickListener, OnItemSelecte
         // TODO Auto-generated method stub
         super.onResume();
         scan.setText(getString(R.string.btscan));
+        mHandler.removeMessages(MSG_UPDATE_LISTVIEW);
+        mHandler.sendEmptyMessage(MSG_UPDATE_LISTVIEW);
+        scan.performClick();
     }
 
     @Override
@@ -468,12 +471,12 @@ public class ScanMode extends Activity implements OnClickListener, OnItemSelecte
             @Override
             public void run() {
                 submitForm();  // 你的表单提交逻辑
-                handler.postDelayed(this, 1 * 60 * 1000); // 5分钟后再次执行
+                handler.postDelayed(this, 5 * 60 * 1000); // 5分钟后再次执行
             }
         };
 
         public void startAutoSubmit() {
-            handler.postDelayed(submitTask, 1 * 60 * 1000); // 第一次执行
+            handler.postDelayed(submitTask, 5 * 60 * 1000); // 第一次执行
         }
 
         public void stopAutoSubmit() {
@@ -510,8 +513,8 @@ public class ScanMode extends Activity implements OnClickListener, OnItemSelecte
         private long calculateInitialDelay() {
             Calendar now = Calendar.getInstance();
             Calendar nextRun = Calendar.getInstance();
-            nextRun.set(Calendar.HOUR_OF_DAY, 15); // 设置执行时间 22:00
-            nextRun.set(Calendar.MINUTE, 45);
+            nextRun.set(Calendar.HOUR_OF_DAY, 23); // 设置执行时间 22:00
+            nextRun.set(Calendar.MINUTE, 0);
             nextRun.set(Calendar.SECOND, 0);
 
             if (now.after(nextRun)) {
