@@ -156,6 +156,129 @@
 				android:background="#BBBBBB" />
 
 		</LinearLayout>
+		<View
+			android:layout_width="fill_parent"
+			android:layout_height="1dip"
+			android:background="#ff555555" />
+		<LinearLayout
+			android:id="@+id/select_all"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:paddingLeft="3.0sp"
+			android:paddingRight="3.0sp"
+			android:background="@color/full_transparent" >
+
+			<View
+				android:layout_width="10.0sp"
+				android:layout_height="30dp"
+				android:background="#0bbbf7"/>
+
+			<TextView
+				android:id="@+id/id_select"
+				android:layout_width="0dp"
+				android:layout_height="30dp"
+				android:layout_weight="1"
+				android:padding="2sp"
+				android:textSize="10sp"
+				android:textColor="#ff444444"
+				android:gravity="center"
+				android:singleLine="true"
+				android:text="批量"
+				android:textStyle="bold"/>
+
+			<View
+				android:layout_width="1dp"
+				android:layout_height="match_parent"
+				android:background="#BBBBBB" />
+
+			<TextView
+				android:id="@+id/epc_select"
+				android:layout_width="0dp"
+				android:layout_height="30dp"
+				android:layout_weight="4"
+				android:gravity="center"
+				android:padding="2sp"
+				android:singleLine="true"
+				android:text=""
+				android:textColor="#ff333333"
+				android:textSize="10sp"
+				android:textStyle="bold" />
+
+			<View
+				android:layout_width="1dp"
+				android:layout_height="match_parent"
+				android:background="#BBBBBB" />
+
+			<EditText
+				android:id="@+id/remark_select"
+				android:focusable="true"
+				android:layout_width="0dip"
+				android:focusableInTouchMode="true"
+				android:layout_height="wrap_content"
+				android:layout_weight="2"
+				android:padding="2sp"
+				android:textSize="16sp"
+				android:textColor="#ff333333"
+				android:gravity="center"
+				android:singleLine="true" />
+
+			<View
+				android:layout_width="1dp"
+				android:layout_height="match_parent"
+				android:background="#BBBBBB" />
+			<TextView
+				android:id="@+id/hotel_text_select"
+				android:layout_width="0dp"
+				android:layout_height="30dp"
+				android:layout_weight="2"
+				android:gravity="center"
+				android:padding="2sp"
+				android:singleLine="true"
+				android:text=""
+				android:textColor="#ff333333"
+				android:textSize="10sp"
+				android:textStyle="bold" />
+			<Spinner
+				android:id="@+id/hotel_select"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_weight="2"
+				android:prompt="@string/chooseHotel"
+				android:visibility="gone"/>
+
+			<View
+				android:layout_width="1dp"
+				android:layout_height="match_parent"
+				android:background="#BBBBBB" />
+
+			<Spinner
+				android:id="@+id/type_select"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:prompt="@string/chooseType"
+				android:visibility="visible"/>
+
+			<View
+				android:layout_width="1dp"
+				android:layout_height="match_parent"
+				android:background="#BBBBBB" />
+
+			<Spinner
+				android:id="@+id/classification_select"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:prompt="@string/chooseClassification"
+				android:visibility="visible"/>
+
+
+			<View
+				android:layout_width="1dp"
+				android:layout_height="match_parent"
+				android:background="#BBBBBB" />
+
+		</LinearLayout>
 
 		<View
 			android:layout_width="fill_parent"

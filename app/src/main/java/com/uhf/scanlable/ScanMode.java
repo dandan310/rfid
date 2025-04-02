@@ -3,15 +3,18 @@ package com.uhf.scanlable;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import com.google.gson.annotations.Expose;
@@ -74,6 +77,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
@@ -83,7 +87,6 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ScanMode extends Activity implements OnClickListener, OnItemClickListener, OnItemSelectedListener {
-
     private static final int PRINTER_VENDOR_ID = 26728;
     private static final String ACTION_USB_PERMISSION = "com.example.qrcodedemo.USB_PERMISSION";
     private static String[] hotelOptions;
@@ -94,6 +97,7 @@ public class ScanMode extends Activity implements OnClickListener, OnItemClickLi
     private final Map<String, Integer> typeMap = new HashMap<>();
     private final Map<String, String> hotelMap = new LinkedHashMap<>();
     private final Map<String, String> hotelNameMap = new LinkedHashMap<>();
+    private final Map<String, Integer> hotelIndexMap = new LinkedHashMap<>();
 
     private final static InboundEntity lastInbound = new InboundEntity();
 
@@ -203,7 +207,6 @@ public class ScanMode extends Activity implements OnClickListener, OnItemClickLi
     public static List<InventoryTagMap> lsTagList = new ArrayList<>();
     public static Map<String, InventoryTagMap> tagMap = new HashMap<>();
     public Map<String, Integer> dtIndexMap = new LinkedHashMap<String, Integer>();
-    private List<InventoryTagMap> data;
 
     private void rfidInit() {
         initRetrofit();
@@ -238,28 +241,57 @@ public class ScanMode extends Activity implements OnClickListener, OnItemClickLi
         });
         hotelMap.put("请选择酒店", null);
         Call<Res<Hotel>> hotel = this.apiService.getHotelList();
-        hotel.enqueue(new Callback<Res<Hotel>>() {
-            @Override
-            public void onResponse(Call<Res<Hotel>> call, Response<Res<Hotel>> response) {
-                if (response.isSuccessful() && response.body() != null && response.body().getSuccess()) {
-                    List<Hotel> items = response.body().getData();
-                    for (Hotel item : items) {
-                        hotelMap.put(item.getName(), item.getId());
-                        hotelNameMap.put(item.getId(), item.getName());
-                    }
-                } else {
-                    playAlarmSound(ScanMode.this);
-                    Toast.makeText(ScanMode.this, "Failed to load hotel data", Toast.LENGTH_SHORT).show();
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Future<Res<Hotel>> future = executor.submit(() -> {
+            try {
+                Response<Res<Hotel>> response = hotel.execute();
+                if (response.isSuccessful() && response.body() != null) {
+                    return response.body();
                 }
-                hotelOptions = hotelMap.keySet().toArray(new String[0]);
-            }
-
-            @Override
-            public void onFailure(Call<Res<Hotel>> call, Throwable t) {
+            } catch (IOException e) {
                 playAlarmSound(ScanMode.this);
-                Toast.makeText(ScanMode.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(ScanMode.this, "Failed to load hotel data", Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
             }
+            throw new RuntimeException("Failed to load hotel data");
         });
+
+        try {
+            Res<Hotel> items = future.get();
+            for (Hotel item : items.getData()) {
+                hotelMap.put(item.getName(), item.getId());
+                hotelNameMap.put(item.getId(), item.getName());
+            }
+            hotelOptions = hotelMap.keySet().toArray(new String[0]);
+            for (int i = 0; i < hotelOptions.length; i++) {
+                hotelIndexMap.put(hotelOptions[i], i);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to load hotel data");
+        }
+//        hotel.enqueue(new Callback<Res<Hotel>>() {
+//            @Override
+//            public void onResponse(Call<Res<Hotel>> call, Response<Res<Hotel>> response) {
+//                if (response.isSuccessful() && response.body() != null && response.body().getSuccess()) {
+//                    List<Hotel> items = response.body().getData();
+//                    for (Hotel item : items) {
+//                        hotelMap.put(item.getName(), item.getId());
+//                        hotelNameMap.put(item.getId(), item.getName());
+//                    }
+//                } else {
+//                    playAlarmSound(ScanMode.this);
+//                    Toast.makeText(ScanMode.this, "Failed to load hotel data", Toast.LENGTH_SHORT).show();
+//                }
+//                hotelOptions = hotelMap.keySet().toArray(new String[0]);
+//            }
+//
+//            @Override
+//            public void onFailure(Call<Res<Hotel>> call, Throwable t) {
+//                playAlarmSound(ScanMode.this);
+//                Toast.makeText(ScanMode.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+//            }
+//        });
     }
 
     private void initRetrofit() {
@@ -297,11 +329,9 @@ public class ScanMode extends Activity implements OnClickListener, OnItemClickLi
             Button inbound = (Button) findViewById(R.id.btn_inbound);
             Button printBtn = (Button) findViewById(R.id.btn_print);
             Button reconnectBtn = (Button) findViewById(R.id.btn_reconnect);
-
             inbound.setOnClickListener(this::inbound);
             reconnectBtn.setOnClickListener(view -> this.initUsb());
             printBtn.setOnClickListener(this::rePrint);
-            data = new ArrayList<InventoryTagMap>();
             txNum = (TextView) findViewById(R.id.tx_num);
             txTime = (TextView) findViewById(R.id.tx_time);
             chk = (CheckBox) findViewById(R.id.check_phase);
@@ -312,13 +342,12 @@ public class ScanMode extends Activity implements OnClickListener, OnItemClickLi
                     // TODO Auto-generated method stub
                     switch (msg.what) {
                         case MSG_UPDATE_LISTVIEW:
-                            if (isCanceled) return;
-                            data = lsTagList;
+//                            if (isCanceled) return;
                             if (myAdapter == null) {
-                                myAdapter = new MyAdapter(ScanMode.this, new ArrayList(data));
+                                myAdapter = new MyAdapter(ScanMode.this, new ArrayList(lsTagList));
                                 listView.setAdapter(myAdapter);
                             } else {
-                                myAdapter.mList = new ArrayList(data);
+                                myAdapter.mList = new ArrayList(lsTagList);
                             }
                             txNum.setText(String.valueOf(myAdapter.getCount()));
                             myAdapter.notifyDataSetChanged();
@@ -340,6 +369,33 @@ public class ScanMode extends Activity implements OnClickListener, OnItemClickLi
         } catch (Exception e) {
 
         }
+    }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        EditText remark = (EditText) findViewById(R.id.remark_select);
+        remark.setOnClickListener(v -> {
+            remark.requestFocus();
+//                    showKeyboard(v);
+        });
+        // **编辑完成后保存**
+
+        remark.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                lsTagList.stream().filter(tag -> !tag.isRegistered).forEach(inventoryTagMap -> inventoryTagMap.remark = remark.getText().toString());
+                mHandler.removeMessages(MSG_UPDATE_LISTVIEW);
+                mHandler.sendEmptyMessage(MSG_UPDATE_LISTVIEW);
+            }
+        });
+        Spinner hotelSpin = (Spinner) findViewById(R.id.hotel_select);
+        Spinner typeSpin = (Spinner) findViewById(R.id.type_select);
+        Spinner classificationSpin = (Spinner) findViewById(R.id.classification_select);
+        TextView hotelText = (TextView) findViewById(R.id.hotel_text_select);
+        setSelectSpin(hotelSpin, typeSpin, classificationSpin, hotelText);
+
+
     }
 
     private void initSelect() {
@@ -391,11 +447,11 @@ public class ScanMode extends Activity implements OnClickListener, OnItemClickLi
     }
 
     private void inbound(View view) {
-        if (usbDevice == null) {
-            playAlarmSound(this);
-            Toast.makeText(ScanMode.this, "打印机未连接，无法入库", Toast.LENGTH_SHORT).show();
-            return;
-        }
+//        if (usbDevice == null) {
+//            playAlarmSound(this);
+//            Toast.makeText(ScanMode.this, "打印机未连接，无法入库", Toast.LENGTH_SHORT).show();
+//            return;
+//        }
         Log.d("inBound,tagList:", lsTagList.stream().map(String::valueOf).collect(Collectors.joining()));
         if (lsTagList.isEmpty()) {
             playAlarmSound(this);
@@ -466,7 +522,7 @@ public class ScanMode extends Activity implements OnClickListener, OnItemClickLi
             return;
         }
         if (lastInbound.getBarCode() != null && !lastInbound.getBarCode().isEmpty() && lastInbound.getType() != null) {
-            printQRCode(lastInbound.getBarCode(), lastInbound.getType() == 0 ? lastInbound.getHotelName()==null?"":lastInbound.getHotelName() : SHARE);
+            printQRCode(lastInbound.getBarCode(), lastInbound.getType() == 0 ? lastInbound.getHotelName() == null ? "" : lastInbound.getHotelName() : SHARE);
             return;
         }
         playAlarmSound(this);
@@ -571,6 +627,119 @@ public class ScanMode extends Activity implements OnClickListener, OnItemClickLi
             timer.cancel();
             timer = null;
         }
+    }
+
+    private void setSelectSpin(Spinner hotelSpin, Spinner typeSpin, Spinner classificationSpin, TextView hotelText) {
+        // 设置下拉列表
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(ScanMode.this, android.R.layout.simple_spinner_item, hotelOptions);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        hotelSpin.setAdapter(adapter);
+        // 监听用户选择
+        hotelSpin.setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                lsTagList.stream().filter(tag -> !tag.isRegistered).forEach(inventoryTagMap -> {
+                    inventoryTagMap.hotelId = hotelMap.get(hotelOptions[position]); // 保存用户选择的值
+                    inventoryTagMap.hotel = hotelNameMap.get(inventoryTagMap.hotelId);
+                });
+                mHandler.removeMessages(MSG_UPDATE_LISTVIEW);
+                mHandler.sendEmptyMessage(MSG_UPDATE_LISTVIEW);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+        // 设置下拉列表
+        ArrayAdapter<String> adapter1 = new ArrayAdapter<>(ScanMode.this, android.R.layout.simple_spinner_item, typeOptions);
+        adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        typeSpin.setAdapter(adapter1);
+
+        // 监听用户选择
+        typeSpin.setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // 保存用户选择的值
+                if (position == 0) {
+                    return;
+                }
+                lsTagList.stream().filter(tag -> !tag.isRegistered).forEach(inventoryTagMap -> {
+                    inventoryTagMap.type = typeMap.get(typeOptions[position]);
+                });
+                //tradition
+                if (position == 1) {
+                    showHotelSpin(hotelSpin, hotelText);
+                } else if (position == 2) {
+                    hideHotelSpinAndClearHotel(hotelSpin, hotelText);
+                }
+                mHandler.removeMessages(MSG_UPDATE_LISTVIEW);
+                mHandler.sendEmptyMessage(MSG_UPDATE_LISTVIEW);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+
+        // 设置下拉列表
+        ArrayAdapter<String> adapter2 = new ArrayAdapter<>(ScanMode.this, android.R.layout.simple_spinner_item, classificationOptions);
+        adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        classificationSpin.setAdapter(adapter2);
+        // 监听用户选择
+        classificationSpin.setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // 保存用户选择的值
+                if (position == 0) {
+                    return;
+                }
+                lsTagList.stream().filter(tag -> !tag.isRegistered).forEach(inventoryTagMap -> {
+                    inventoryTagMap.classification = classificationMap.get(classificationOptions[position]);
+                });
+                mHandler.removeMessages(MSG_UPDATE_LISTVIEW);
+                mHandler.sendEmptyMessage(MSG_UPDATE_LISTVIEW);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+    }
+
+    private void hideTextViewAndShowSpin(MyAdapter.ItemView iv) {
+        iv.spType.setVisibility(View.VISIBLE);
+        iv.tvType.setVisibility(View.GONE);
+        iv.spClassification.setVisibility(View.VISIBLE);
+        iv.tvClassification.setVisibility(View.GONE);
+    }
+
+    private void showHotelSpin(Spinner spHotel, TextView tvHotel) {
+        spHotel.setVisibility(View.VISIBLE);
+        tvHotel.setVisibility(View.GONE);
+    }
+
+    private void hideHotelSpinAndClearHotel(MyAdapter.ItemView iv, InventoryTagMap inventoryTagMap) {
+        assert inventoryTagMap != null;
+        //改一个全部改
+        iv.spHotel.setVisibility(View.GONE);
+        iv.tvHotel.setVisibility(View.VISIBLE);
+        iv.tvHotel.setText("");
+        inventoryTagMap.hotelId = null;
+        inventoryTagMap.hotel = "";
+    }
+
+    private void hideHotelSpinAndClearHotel(Spinner hotelSpin, TextView hotelText) {
+        //改一个全部改
+        hotelSpin.setVisibility(View.GONE);
+        hotelText.setVisibility(View.VISIBLE);
+        hotelText.setText("");
+        lsTagList.forEach(inventoryTagMap -> {
+            inventoryTagMap.hotelId = null;
+            inventoryTagMap.hotel = "";
+        });
+
     }
 
     public class MsgCallback implements TagCallback {
@@ -715,14 +884,12 @@ public class ScanMode extends Activity implements OnClickListener, OnItemClickLi
 
             String epc = inventoryTagMap.strEPC;
             String memid = inventoryTagMap.strMem;
-//            Integer findIndex = dtIndexMap.get(epc + "," + memid);
-//            assert findIndex!=null;
             ItemView finalIv1 = iv;
             iv.tvRemark.setOnClickListener(v -> {
                 finalIv1.tvRemark.requestFocus();
 //                    showKeyboard(v);
             });
-            // **编辑完成后保存**
+//             **编辑完成后保存**
 
             iv.tvRemark.setOnFocusChangeListener((v, hasFocus) -> {
                 if (!hasFocus) {
@@ -750,7 +917,7 @@ public class ScanMode extends Activity implements OnClickListener, OnItemClickLi
                 setTypeSpin(iv, inventoryTagMap);
                 setHotelSpin(iv, inventoryTagMap);
                 setClassificationSpin(iv, inventoryTagMap);
-                clearSpin(iv);
+//                clearSpin(iv);
                 iv.tvHotel.setText("");
                 hideTextViewAndShowSpin(iv);
             }
@@ -771,17 +938,6 @@ public class ScanMode extends Activity implements OnClickListener, OnItemClickLi
             iv.tvClassification.setVisibility(View.VISIBLE);
         }
 
-        private void hideTextViewAndShowSpin(ItemView iv) {
-            iv.spType.setVisibility(View.VISIBLE);
-            iv.tvType.setVisibility(View.GONE);
-            iv.spClassification.setVisibility(View.VISIBLE);
-            iv.tvClassification.setVisibility(View.GONE);
-        }
-
-        private void showHotelSpin(ItemView iv) {
-            iv.tvHotel.setVisibility(View.GONE);
-            iv.spHotel.setVisibility(View.VISIBLE);
-        }
 
         private void setTypeSpin(ItemView iv, InventoryTagMap inventoryTagMap) {
             assert inventoryTagMap != null;
@@ -789,6 +945,15 @@ public class ScanMode extends Activity implements OnClickListener, OnItemClickLi
             ArrayAdapter<String> adapter = new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_item, typeOptions);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             iv.spType.setAdapter(adapter);
+            // 防止重复触发监听器，先移除旧的监听
+            iv.spType.setOnItemSelectedListener(null);
+
+            // 设置 Spinner 默认选项（确保 UI 正确回显数据）
+            if (inventoryTagMap.type != null) {
+                iv.spType.setSelection(inventoryTagMap.type + 1);
+            } else {
+                iv.spType.setSelection(0);
+            }
 
             // 监听用户选择
             iv.spType.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -807,7 +972,7 @@ public class ScanMode extends Activity implements OnClickListener, OnItemClickLi
                     if (inventoryTagMap.type == null || 1 == inventoryTagMap.type) {
                         hideHotelSpinAndClearHotel(iv, inventoryTagMap);
                     } else if (0 == inventoryTagMap.type) {
-                        showHotelSpin(iv);
+                        showHotelSpin(iv.spHotel, iv.tvHotel);
                     }
                 }
 
@@ -822,10 +987,16 @@ public class ScanMode extends Activity implements OnClickListener, OnItemClickLi
             ArrayAdapter<String> adapter = new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_item, classificationOptions);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             iv.spClassification.setAdapter(adapter);
+            // 防止重复触发监听器，先移除旧的监听
+            iv.spClassification.setOnItemSelectedListener(null);
+            if (inventoryTagMap.classification != null) {
+                iv.spClassification.setSelection(inventoryTagMap.classification + 1);
+            }
             // 监听用户选择
             iv.spClassification.setOnItemSelectedListener(new OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    if (position == 0){return;}
                     // 保存用户选择的值
                     inventoryTagMap.classification = classificationMap.get(classificationOptions[position]);
                 }
@@ -842,10 +1013,18 @@ public class ScanMode extends Activity implements OnClickListener, OnItemClickLi
             ArrayAdapter<String> adapter = new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_item, hotelOptions);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             iv.spHotel.setAdapter(adapter);
+            // 防止重复触发监听器，先移除旧的监听
+            iv.spHotel.setOnItemSelectedListener(null);
+            if (inventoryTagMap.hotel != null && hotelIndexMap.get(inventoryTagMap.hotel) != null) {
+                iv.spHotel.setSelection(hotelIndexMap.get(inventoryTagMap.hotel));
+            }
             // 监听用户选择
             iv.spHotel.setOnItemSelectedListener(new OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    if (position == 0){
+                        return;
+                    }
                     inventoryTagMap.hotelId = hotelMap.get(hotelOptions[position]); // 保存用户选择的值
                     inventoryTagMap.hotel = hotelNameMap.get(inventoryTagMap.hotelId);
                 }
@@ -854,16 +1033,6 @@ public class ScanMode extends Activity implements OnClickListener, OnItemClickLi
                 public void onNothingSelected(AdapterView<?> parent) {
                 }
             });
-        }
-
-        private void hideHotelSpinAndClearHotel(ItemView iv, InventoryTagMap inventoryTagMap) {
-            assert inventoryTagMap != null;
-            //改一个全部改
-            iv.spHotel.setVisibility(View.GONE);
-            iv.tvHotel.setVisibility(View.VISIBLE);
-            iv.tvHotel.setText("");
-            inventoryTagMap.hotelId = null;
-            inventoryTagMap.hotel = "";
         }
 
 
@@ -1054,4 +1223,5 @@ public class ScanMode extends Activity implements OnClickListener, OnItemClickLi
     public void showErrorFeedback(Context context, View view) {
         playAlarmSound(context);  // 声音
     }
+
 }
