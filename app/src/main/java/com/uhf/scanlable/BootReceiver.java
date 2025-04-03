@@ -14,11 +14,7 @@ public class BootReceiver extends BroadcastReceiver {
 
             // 启动目标应用的主 Activity
             Intent serviceIntent = new Intent(context, AutoStartService.class);
-            if (Build.VERSION_CODES.O <= Build.VERSION.SDK_INT) {
-                context.startForegroundService(serviceIntent);
-            } else {
-                context.startService(serviceIntent);
-            }
+            context.startForegroundService(serviceIntent);
         }
     }
 }

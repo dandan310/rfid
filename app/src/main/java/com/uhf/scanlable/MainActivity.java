@@ -33,7 +33,7 @@ public class MainActivity extends TabActivity {
 		myTabHost.addTab(tabSpec3);
 		myTabHost.addTab(tabSpec1);
 		myTabHost.addTab(tabSpec2);
-		myTabHost.setCurrentTab(0);
+		myTabHost.setCurrentTab(3);
 	}
 
 	@Override

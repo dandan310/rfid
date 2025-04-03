@@ -90,9 +90,10 @@ public class Connect232 extends Activity {
 			
 			spacom = new ArrayAdapter<String>(Connect232.this,  
                     android.R.layout.simple_spinner_dropdown_item, entryValues);  
-			mDropPort.setAdapter(spacom);  
-			mDropPort.setSelection(9,false);
-			devport = spacom.getItem(9);
+			mDropPort.setAdapter(spacom);
+			int indexS0 = findTTYS0Index(entryValues);
+			mDropPort.setSelection(indexS0,false);
+			devport = spacom.getItem(indexS0);
 			mDropPort.setOnItemSelectedListener(new Spinner.OnItemSelectedListener() {  
 		        public void onItemSelected(AdapterView<?> arg0, View arg1,  
 		                int position, long arg3) {  
@@ -185,10 +186,20 @@ public class Connect232 extends Activity {
 				}
 			});
 		}
-		
 
-		
-		@Override
+	private int findTTYS0Index(String[] entryValues) {
+		int index = -1;
+		for (int i = 0; i < entryValues.length; i++) {
+			if (entryValues[i].equals("/dev/ttyS0")){
+				index = i;
+				break;
+			}
+		}
+		return index;
+	}
+
+
+	@Override
 		protected void onResume() {
 			// TODO Auto-generated method stub
 			super.onResume();
